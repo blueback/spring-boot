@@ -20,7 +20,7 @@ import java.util.Set;
 
 /**
  * Provides access to meta-data written by the auto-configure annotation processor.
- *
+ * 制定配置类（Configuration）的生效条件（Condition）
  * @author Phillip Webb
  * @since 1.5.0
  */

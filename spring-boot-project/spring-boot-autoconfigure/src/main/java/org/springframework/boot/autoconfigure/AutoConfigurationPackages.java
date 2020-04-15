@@ -39,6 +39,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
+ * 将使用 @AutoConfigurationPackage 注解的类所在的包（package），注册成一个 Spring IoC 容器中的 Bean 。
+ * 后续有其它模块需要使用，就可以通过获得该 Bean ，从而获得所在的包。例如说，JPA 模块，需要使用到。
  * Class for storing auto-configuration packages for reference later (e.g. by JPA entity
  * scanner).
  *
@@ -79,6 +81,7 @@ public abstract class AutoConfigurationPackages {
 	}
 
 	/**
+	 * 注册一个用于存储报名（package）的 Bean 到 Spring IoC 容器中。
 	 * Programmatically registers the auto-configuration package names. Subsequent
 	 * invocations will add the given package names to those that have already been
 	 * registered. You can use this method to manually define the base packages that will
@@ -90,11 +93,13 @@ public abstract class AutoConfigurationPackages {
 	 * @param packageNames the package names to set
 	 */
 	public static void register(BeanDefinitionRegistry registry, String... packageNames) {
+		// <1> 如果已经存在该 BEAN ，则修改其包（package）属性
 		if (registry.containsBeanDefinition(BEAN)) {
 			BeanDefinition beanDefinition = registry.getBeanDefinition(BEAN);
 			ConstructorArgumentValues constructorArguments = beanDefinition.getConstructorArgumentValues();
 			constructorArguments.addIndexedArgumentValue(0, addBasePackages(constructorArguments, packageNames));
 		}
+		// <2> 如果不存在该 BEAN ，则创建一个 Bean ，并进行注册
 		else {
 			GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
 			beanDefinition.setBeanClass(BasePackages.class);
@@ -105,7 +110,9 @@ public abstract class AutoConfigurationPackages {
 	}
 
 	private static String[] addBasePackages(ConstructorArgumentValues constructorArguments, String[] packageNames) {
+		// 获得已存在的
 		String[] existing = (String[]) constructorArguments.getIndexedArgumentValue(0, String[].class).getValue();
+		// 进行合并
 		Set<String> merged = new LinkedHashSet<>();
 		merged.addAll(Arrays.asList(existing));
 		merged.addAll(Arrays.asList(packageNames));
